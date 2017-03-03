@@ -1,0 +1,225 @@
+'use strict';
+
+var REGEXP_WORD = /[a-zа-я1-9]+/gi;
+
+function init() {
+    Object.defineProperty(Object.prototype, 'wrap', {
+        enumerable: false,
+        value: function (obj) {
+            return {
+                value: obj
+            };
+        }
+    });
+
+    Object.defineProperty(Object.prototype.wrap, 'isNull', {
+        enumerable: false,
+        value: function () {
+            return this.value === null;
+        }
+    });
+
+    Object.defineProperty(Object.prototype, 'check', {
+        enumerable: false,
+        get: function () {
+            var nameSpace = setObjPropToProto.call(this);
+            setObjProperties(nameSpace);
+            return nameSpace;
+        }
+    });
+
+    Object.defineProperty(Array.prototype, 'check', {
+        enumerable: false,
+        get: function () {
+            var nameSpace = setObjPropToProto.call(this);
+            setArrProperties(nameSpace);
+            return nameSpace;
+        }
+    });
+
+    Object.defineProperty(String.prototype, 'check', {
+        enumerable: false,
+        get: function () {
+            var nameSpace = {
+                str: this
+            };
+            setStringProperties(nameSpace);
+
+            return nameSpace;
+        }
+    });
+
+    Object.defineProperty(Function.prototype, 'check', {
+        enumerable: false,
+        get: function () {
+            var nameSpace = {
+                func: this
+            };
+
+            setFunctionProperties(nameSpace);
+            return nameSpace;
+        }
+    });
+};
+
+function setObjProperties(obj) {
+    Object.defineProperty(obj, 'containsKeys', {
+        enumerable: false,
+        value: containsKeys
+    });
+
+    Object.defineProperty(obj, 'hasKeys', {
+        enumerable: false,
+        value: hasKeys
+    });
+
+    Object.defineProperty(obj, 'containsValues', {
+        enumerable: false,
+        value: containsValues
+    });
+
+    Object.defineProperty(obj, 'hasValues', {
+        enumerable: false,
+        value: hasValues
+    });
+
+    Object.defineProperty(obj, 'hasValueType', {
+        enumerable: false,
+        value: hasValueType
+    });
+
+    Object.defineProperty(obj, 'countProperties', {
+        enumerable: false,
+        value: countProperties
+    });
+}
+
+function setArrProperties(obj) {
+    Object.defineProperty(obj, 'containsKeys', {
+        enumerable: false,
+        value: containsKeys
+    });
+
+    Object.defineProperty(obj, 'hasKeys', {
+        enumerable: false,
+        value: hasKeys
+    });
+
+    Object.defineProperty(obj, 'containsValues', {
+        enumerable: false,
+        value: containsValues
+    });
+
+    Object.defineProperty(obj, 'hasValues', {
+        enumerable: false,
+        value: hasValues
+    });
+
+    Object.defineProperty(obj, 'hasValueType', {
+        enumerable: false,
+        value: hasValueType
+    });
+
+    Object.defineProperty(obj, 'hasLength', {
+        enumerable: false,
+        value: hasLength
+    });
+
+    Object.defineProperty(obj, 'countProperties', {
+        enumerable: false,
+        value: countProperties
+    });
+}
+
+function setStringProperties(obj) {
+    Object.defineProperty(obj, 'hasLength', {
+        enumerable: false,
+        value: function () {
+            return length === this.str.length;
+        }
+    });
+
+    Object.defineProperty(obj, 'hasWordsCount', {
+        enumerable: false,
+        value: hasWordsCount
+    });
+}
+
+function setFunctionProperties(obj) {
+    Object.defineProperty(obj, 'hasParamsCount', {
+        enumerable: false,
+        value: hasParamsCount
+    });
+}
+
+function setObjPropToProto() {
+    var checkNameSpace = {};
+    for (var prop in this) {
+        if (this.hasOwnProperty(prop)) {
+            checkNameSpace[prop] = this[prop];
+        }
+    }
+
+    return checkNameSpace;
+}
+
+function containsKeys(keys) {
+    return keys.every(function (key) {
+        return this.hasOwnProperty(key);
+    }, this);
+}
+
+function hasKeys(keys) {
+    return keys.every(function (key) {
+        return this.hasOwnProperty(key);
+    }, this) && keys.length === this.countProperties();
+}
+
+function containsValues(values) {
+    return values.every(function (value) {
+        for (var prop in this) {
+            if (this[prop] === value) {
+                return true;
+            }
+        }
+
+        return false;
+    }, this);
+}
+
+function hasValues(values) {
+    return values.every(function (value) {
+        return this.some(function (val) {
+            return val === value;
+        });
+    }, this) && values.length === this.countProperties();
+}
+
+function hasValueType(key, type) {
+    return Object.getPrototypeOf(key) === type.prototype;
+}
+
+function hasLength(length) {
+    return length === this.countProperties();
+}
+
+function hasParamsCount(count) {
+    return count === this.func.length;
+}
+
+function hasWordsCount(count) {
+    return count === this.str.match(REGEXP_WORD).length;
+}
+
+function countProperties() {
+    var count = 0;
+    for (var key in this) {
+        if (this.hasOwnProperty(key)) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+exports.init = init;
